@@ -50,8 +50,12 @@ http {
 			proxy_pass http://app_server/api/;
         }
 
-        if ($http_x_forwarded_proto != "https") {
-            return 301 https://$host$request_uri;
+        location /gov/ {
+            proxy_pass http://congress.api.sunlightfoundation.com/;
         }
+
+        #if ($http_x_forwarded_proto != "https") {
+        #    return 301 https://$host$request_uri;
+        #}
 	}
 }
