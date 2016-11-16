@@ -10,6 +10,8 @@ pids
 
 #Build, etc
 build
+build_server
+
 .vscode
 
 # Dependency directories
