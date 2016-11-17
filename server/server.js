@@ -1,3 +1,5 @@
+import 'babel-polyfill';
+
 import axios from 'axios';
 import express from 'express';
 import fs from 'fs';
