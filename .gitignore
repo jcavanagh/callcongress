@@ -11,8 +11,10 @@ pids
 #Build, etc
 build
 build_server
-
 .vscode
+
+# Environment secrets
+.env
 
 # Dependency directories
 node_modules
