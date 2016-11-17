@@ -1,18 +1,58 @@
 import React from 'react';
 import axios from 'axios';
 
+import Dialog from 'material-ui/Dialog';
 import FontIcon from 'material-ui/FontIcon';
 import Paper from 'material-ui/Paper';
+import RaisedButton from 'material-ui/RaisedButton';
+import TextField from 'material-ui/TextField';
 
 export default class RepProfile extends React.Component {
-  call = (phone) => {
-    axios.post('/api/call');
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      dialogOpen: false,
+      phone: ''
+    };
+  }
+
+  call = () => {
+    axios.post('/api/call', {}, {
+      params: {
+        phone: this.state.phone,
+        c_id: this.props.member.bioguide_id
+      }
+    });
+  }
+
+  showDialog = () => {
+    this.setState({
+      dialogOpen: true
+    });
+  }
+
+  hideDialog = () => {
+    this.setState({
+      dialogOpen: false
+    });
+  }
+
+  setPhone = (event) => {
+    this.setState({
+      phone: event.target.value,
+    });
   }
 
   render() {
     const member = this.props.member;
     const leadershipRole = member.leadership_role ? <span>{member.leadership_role}<br/></span> : null;
     const name = `${member.title}. ${member.first_name} ${member.last_name}`;
+
+    const dialogActions = [
+      <RaisedButton label="Cancel" onTouchTap={this.hideDialog} />,
+      <RaisedButton label="Call" primary={true} onTouchTap={this.call} />
+    ];
 
     return (
       <div style={{display: 'inline-block', textAlign: 'center'}}>
@@ -25,7 +65,7 @@ export default class RepProfile extends React.Component {
               style={{width:'100%', height:'110%'}}
             />
           </Paper>
-          <div style={{marginTop: 20, cursor: 'pointer'}} onClick={this.call.bind(this, member.phone)}>
+          <div style={{marginTop: 20, cursor: 'pointer'}} onClick={this.showDialog}>
             <Paper zDepth={2} circle={true} style={{width: 60, height: 60, margin: 'auto', backgroundColor: '#449d44'}}>
               <FontIcon className="fa fa-phone" style={{top: 18, color: 'white'}} />
             </Paper>
@@ -45,6 +85,10 @@ export default class RepProfile extends React.Component {
             </a>
           </div>
         </Paper>
+        <Dialog open={this.state.dialogOpen} onRequestClose={this.hideDialog} actions={dialogActions}>
+          Enter your phone number (with area code) to connect to {name}:
+          <TextField hintText="Your phone number, with area code" value={this.state.phone} onChange={this.setPhone}/>
+        </Dialog>
       </div>
     );
   }

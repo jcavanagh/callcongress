@@ -1,3 +1,4 @@
+import axios from 'axios';
 import express from 'express';
 import fs from 'fs';
 import proxy from 'http-proxy-middleware';
@@ -29,29 +30,63 @@ if(!isProd) {
 //Twilio
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-app.post('/api/call', (req, resp) => {
-  twilioClient.makeCall({
-    to: process.env.TWILIO_TEST_NUMBER,
-    from: process.env.TWILIO_NUMBER,
-    url: `http://${req.headers.host}/api/call/outbound`
-  }, (err, respData) => {
-    if(err) {
-      resp.send({
-        message: err,
-        response: respData
-      });
-    } else {
-      resp.send({
-        message: 'Call initiated',
-        response: respData
-      });
-    }
-  });
+app.post('/api/call', (req, res) => {
+  if(req.query.phone && req.query.c_id) {
+    twilioClient.makeCall({
+      to: req.query.phone,
+      from: process.env.TWILIO_NUMBER,
+      url: `http://${req.headers.host}/api/call/outbound?c_id=${req.query.c_id}`
+    }, (err, resData) => {
+      if(err) {
+        console.log(err, resData);
+        res.send({message: err});
+      } else {
+        res.send({
+          message: 'Call initiated'
+        });
+      }
+    });
+  } else {
+    res.status(400).send({message: 'Please provide a phone number and congressperson ID' });
+  }
 });
 
-app.post('/api/call/outbound', (req, res) => {
-  res.type('text/xml');
-  res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="alice">Hey neat, it works</Say><Dial>${process.env.TWILIO_TEST_NUMBER}</Dial></Response>`);
+//Gets a congressperson by bioguide_id
+async function getCongressPerson(cid) {
+  return await axios.get('http://congress.api.sunlightfoundation.com/legislators', { params: { bioguide_id: cid }}).then((resp) => {
+    return resp.data.results[0];
+  }).catch(e => console.error(e));
+}
+
+//Nicer sounding titles for robot voice
+const TITLES = {
+  Rep: 'Representative',
+  Sen: 'Senator'
+};
+
+app.post('/api/call/outbound', async (req, res) => {
+  const cid = req.query.c_id;
+
+  if(cid) {
+    const person = await getCongressPerson(cid);
+
+    if(person) {
+      const title = TITLES[person.title] || '';
+      const name = `${person.first_name} ${person.last_name}`;
+
+      const twiml = new twilio.TwimlResponse();
+      twiml.pause({ length: 1 });
+      twiml.say(`Now connecting you to the office of ${title} ${name}`, {
+        voice: 'alice'
+      });
+      twiml.dial(person.phone);
+
+      res.type('text/xml');
+      res.send(twiml.toString());
+    }
+  }
+
+  res.status(400).send({ message: `Could not find congressperson with ID: ${cid}`});
 });
 
 app.listen(port, () => {
