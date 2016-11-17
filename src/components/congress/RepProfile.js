@@ -24,6 +24,10 @@ export default class RepProfile extends React.Component {
         c_id: this.props.member.bioguide_id
       }
     });
+
+    this.setState({
+      dialogOpen: false
+    });
   }
 
   showDialog = () => {
@@ -87,7 +91,7 @@ export default class RepProfile extends React.Component {
         </Paper>
         <Dialog open={this.state.dialogOpen} onRequestClose={this.hideDialog} actions={dialogActions}>
           Enter your phone number (with area code) to connect to {name}:
-          <TextField hintText="Your phone number, with area code" value={this.state.phone} onChange={this.setPhone}/>
+          <TextField hintText="Your phone number, with area code" value={this.state.phone} onChange={this.setPhone} ref={field => field && field.focus()}/>
         </Dialog>
       </div>
     );
