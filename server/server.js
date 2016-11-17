@@ -64,7 +64,7 @@ const TITLES = {
   Sen: 'Senator'
 };
 
-app.post('/api/call/outbound', async (req, res) => {
+async function outboundHandler(req, res) {
   const cid = req.query.c_id;
 
   if(cid) {
@@ -87,7 +87,10 @@ app.post('/api/call/outbound', async (req, res) => {
   }
 
   res.status(400).send({ message: `Could not find congressperson with ID: ${cid}`});
-});
+}
+
+app.post('/api/call/outbound', outboundHandler);
+app.get('/api/call/outbound', outboundHandler);
 
 app.listen(port, () => {
   console.log(`Backend listening on ${port}`);
