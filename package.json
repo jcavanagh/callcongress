@@ -19,6 +19,7 @@
     "babel-preset-stage-2": "^6.18.0",
     "express": "^4.14.0",
     "forever": "^0.15.3",
+    "http-proxy-middleware": "^0.17.2",
     "material-ui": "^0.16.2",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
@@ -31,5 +32,6 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "heroku-postbuild": "npm run build"
-  }
+  },
+  "proxy": "http://localhost:3001/proxy"
 }

@@ -22,3 +22,15 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+html {
+  height: 100vh;
+}
+
+div#root {
+  min-height: 100vh;
+  background-color: #EEEEEE;
+  font-weight: 400;
+
+  font-family: "Myriad Set Pro", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}

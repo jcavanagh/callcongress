@@ -1,10 +1,8 @@
 import React from 'react';
 
-import AppBar from 'material-ui/AppBar';
-import IconButton from 'material-ui/IconButton';
-
 import RepView from '../congress/RepView';
 import CongressProvider from '../../providers/congress';
+import Loading from './Loading';
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -16,30 +14,45 @@ export default class Home extends React.Component {
   }
 
   componentDidMount() {
-    this.fetchReps();
+    this.fetchReps(this.props.location);
+    this.fetchLeadership();
   }
 
   componentWillReceiveProps(nextProps) {
     if(nextProps.location) {
-      this.fetchReps();
+      this.fetchReps(nextProps.location);
     }
   }
 
-  fetchReps = async () => {
-    if(this.props.location) {
-      const reps = await CongressProvider.legislators.locate(this.props.location);
-      this.setState({
-        legislators: reps
-      });
-    }
+  fetchReps = async (location) => {
+    const reps = await CongressProvider.legislators.locate(location);
+    this.setState({
+      legislators: reps
+    });
+  }
+
+  fetchLeadership = async () => {
+    const reps = await CongressProvider.legislators.leadership();
+    this.setState({
+      leadership: reps
+    });
   }
 
   render() {
     return (
-      <div>
-        <AppBar title="CC" iconElementLeft={<IconButton />} />
-        {this.state.legislators ?
-          <RepView legislators={this.state.legislators} /> : null
+      <div style={{textAlign: 'center'}}>
+        {this.state.legislators && this.state.leadership ?
+          <div>
+            <p style={{fontSize: 36}}>Your Elected Congress Members</p>
+            <p style={{fontSize: 24}}>To call, just click the green button to get started</p>
+            <RepView legislators={this.state.legislators} />
+            <p style={{fontSize: 36}}>Congressional Leadership</p>
+            <p style={{fontSize: 24}}>Sometimes you need to call the boss</p>
+            <p style={{fontSize: 30}}>Senate</p>
+            <RepView legislators={this.state.leadership.senate} />
+            <p style={{fontSize: 30}}>House of Representatives</p>
+            <RepView legislators={this.state.leadership.house} />
+          </div> : <Loading message="Fetching representative information..." />
         }
       </div>
     );
